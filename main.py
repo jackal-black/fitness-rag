@@ -16,12 +16,18 @@ if env_path.exists():
     load_dotenv(env_path)
 
 from fastapi import FastAPI, HTTPException
-from fastapi.responses import StreamingResponse
+from fastapi.responses import FileResponse, StreamingResponse
+from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
 from query import retrieve, build_prompt, answer_openai, answer_openai_stream
 
 app = FastAPI(title="Fitness RAG", version="1.2.0")
+
+# 挂载静态文件
+static_dir = Path(__file__).parent / "static"
+if static_dir.exists():
+    app.mount("/static", StaticFiles(directory=str(static_dir)), name="static")
 
 # ── 多轮对话 session 管理 ──
 # 格式: { session_id: [{"role": "user"/"assistant", "content": str}, ...] }
@@ -130,6 +136,9 @@ class ChatResponse(BaseModel):
 
 @app.get("/")
 def root():
+    idx = Path(__file__).parent / "static" / "index.html"
+    if idx.exists():
+        return FileResponse(str(idx))
     return {"message": "Fitness RAG API", "docs": "/docs", "version": "1.2.0"}
 
 
