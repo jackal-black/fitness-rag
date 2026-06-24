@@ -1,0 +1,13 @@
+services:
+  fitness-rag:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+    volumes:
+      - ./data:/app/data
+      - ./index:/app/index
+    restart: unless-stopped

@@ -1,0 +1,122 @@
+[
+  {
+    "id": "SQUAT-01",
+    "question": "深蹲时膝盖内扣怎么纠正",
+    "expected_sources": ["squat-technique.md"],
+    "category": "动作纠正"
+  },
+  {
+    "id": "SQUAT-02",
+    "question": "杠铃深蹲的标准动作流程是什么",
+    "expected_sources": ["squat-technique.md"],
+    "category": "动作标准"
+  },
+  {
+    "id": "SQUAT-03",
+    "question": "深蹲时杠铃应该放在什么位置",
+    "expected_sources": ["squat-technique.md"],
+    "category": "动作标准"
+  },
+  {
+    "id": "SQUAT-04",
+    "question": "深蹲蹲多深才标准",
+    "expected_sources": ["squat-technique.md"],
+    "category": "动作标准"
+  },
+  {
+    "id": "SQUAT-05",
+    "question": "什么是瓦尔萨尔瓦动作",
+    "expected_sources": ["squat-technique.md"],
+    "category": "呼吸技巧"
+  },
+  {
+    "id": "NUTRI-01",
+    "question": "减脂期每天吃多少蛋白质",
+    "expected_sources": ["nutrition-for-muscle-growth.md"],
+    "category": "营养"
+  },
+  {
+    "id": "NUTRI-02",
+    "question": "增肌每日热量盈余应该多少",
+    "expected_sources": ["nutrition-for-muscle-growth.md"],
+    "category": "营养"
+  },
+  {
+    "id": "NUTRI-03",
+    "question": "什么是基础代谢，怎么计算",
+    "expected_sources": ["nutrition-for-muscle-growth.md"],
+    "category": "营养"
+  },
+  {
+    "id": "NUTRI-04",
+    "question": "肌酸每天吃多少克",
+    "expected_sources": ["nutrition-for-muscle-growth.md"],
+    "category": "补剂"
+  },
+  {
+    "id": "NUTRI-05",
+    "question": "蛋白质的优质来源有哪些",
+    "expected_sources": ["nutrition-for-muscle-growth.md"],
+    "category": "营养"
+  },
+  {
+    "id": "STR-01",
+    "question": "什么是渐进超负荷",
+    "expected_sources": ["strength-training-basics.md"],
+    "category": "训练原理"
+  },
+  {
+    "id": "STR-02",
+    "question": "三大核心复合动作是哪三个",
+    "expected_sources": ["strength-training-basics.md"],
+    "category": "训练原理"
+  },
+  {
+    "id": "STR-03",
+    "question": "增肌训练组间休息多久",
+    "expected_sources": ["strength-training-basics.md"],
+    "category": "训练原理"
+  },
+  {
+    "id": "STR-04",
+    "question": "RPE 9是什么意思",
+    "expected_sources": ["strength-training-basics.md"],
+    "category": "训练原理"
+  },
+  {
+    "id": "STR-05",
+    "question": "新手应该每周练几天",
+    "expected_sources": ["strength-training-basics.md"],
+    "category": "训练计划"
+  },
+  {
+    "id": "CROSS-01",
+    "question": "健身增肌需要每天吃多少热量",
+    "expected_sources": ["nutrition-for-muscle-growth.md", "strength-training-basics.md"],
+    "category": "综合"
+  },
+  {
+    "id": "CROSS-02",
+    "question": "减脂期应该怎么训练和饮食",
+    "expected_sources": ["nutrition-for-muscle-growth.md", "strength-training-basics.md"],
+    "category": "综合"
+  },
+  {
+    "id": "SQUAT-06",
+    "question": "深蹲时含胸圆背怎么纠正",
+    "expected_sources": ["squat-technique.md"],
+    "category": "动作纠正"
+  },
+  {
+    "id": "NUTRI-06",
+    "question": "健身前应该吃什么碳水",
+    "expected_sources": ["nutrition-for-muscle-growth.md"],
+    "category": "营养"
+  },
+  {
+    "id": "STR-06",
+    "question": "提高力量应该休息多久",
+    "expected_sources": ["strength-training-basics.md"],
+    "category": "训练原理"
+  }
+]
