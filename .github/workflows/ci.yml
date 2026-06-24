@@ -1,0 +1,41 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  eval:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: 安装 Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: 安装依赖
+        run: |
+          pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: 建立索引
+        run: python ingest.py data/*.md --reset
+
+      - name: 运行检索评估（TF-IDF / BM25 / Hybrid 对比）
+        run: |
+          echo "=== TF-IDF ===" && python eval/run.py --retriever tfidf
+          echo "=== BM25 ===" && python eval/run.py --retriever bm25
+          echo "=== Hybrid ===" && python eval/run.py --retriever hybrid
+
+      - name: 生成 HTML 报告
+        run: python eval/run.py --html
+
+      - name: 上传评估报告
+        uses: actions/upload-artifact@v4
+        with:
+          name: eval-report
+          path: eval/report.html
