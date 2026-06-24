@@ -71,14 +71,30 @@ def retrieve_bm25(bm25, tokenized_corpus, query: str, top_k: int = TOP_K):
     return [(idx, float(scores[idx])) for idx in top_indices]
 
 
+def retrieve_embedding(embeddings, query: str, top_k: int = TOP_K):
+    """Embedding 语义检索"""
+    try:
+        from sentence_transformers import SentenceTransformer
+        model = SentenceTransformer("all-MiniLM-L6-v2")
+        q_vec = model.encode([query])
+        scores = cosine_similarity(q_vec, embeddings).flatten()
+        top_indices = scores.argsort()[::-1][:top_k]
+        return [(idx, float(scores[idx])) for idx in top_indices]
+    except Exception as e:
+        print(f"  ⚠️ Embedding 检索失败: {e}")
+        return []
+
+
 def retrieve(query: str, top_k: int = TOP_K, retriever: str = "hybrid"):
     """
     统一检索入口。
 
     retriever 参数:
-      - "tfidf": 仅 TF-IDF
-      - "bm25":  仅 BM25
-      - "hybrid": TF-IDF + BM25 融合（默认）
+      - "tfidf":      仅 TF-IDF（关键词）
+      - "bm25":       仅 BM25（词频+长度归一）
+      - "embedding":  仅 Embedding（语义）
+      - "hybrid":     TF-IDF + BM25 双路融合（默认）
+      - "hybrid3":    TF-IDF + BM25 + Embedding 三路融合
     """
     data = load_index()
     if data is None:
@@ -91,19 +107,37 @@ def retrieve(query: str, top_k: int = TOP_K, retriever: str = "hybrid"):
         results = retrieve_tfidf(data["vectorizer"], data["matrix"], query, top_k)
     elif retriever == "bm25":
         results = retrieve_bm25(data["bm25"], data["tokenized_corpus"], query, top_k)
-    else:
-        # Hybrid: Reciprocal Rank Fusion
+    elif retriever == "embedding":
+        if "embeddings" not in data:
+            print("  ⚠️ 索引中没有 Embedding，请运行 python ingest.py 重新建索引")
+            return None
+        results = retrieve_embedding(data["embeddings"], query, top_k)
+    elif retriever == "hybrid3":
+        # 三路融合
+        if "embeddings" not in data:
+            print("  ⚠️ 索引中没有 Embedding，请运行 python ingest.py 重新建索引")
+            return None
         tfidf_results = retrieve_tfidf(data["vectorizer"], data["matrix"], query, top_k * 2)
         bm25_results = retrieve_bm25(data["bm25"], data["tokenized_corpus"], query, top_k * 2)
-
-        # RRF 分数
+        emb_results = retrieve_embedding(data["embeddings"], query, top_k * 2)
         rrf_scores = {}
         for rank, (idx, _) in enumerate(tfidf_results):
             rrf_scores[idx] = rrf_scores.get(idx, 0.0) + 1.0 / (RRF_K + rank + 1)
         for rank, (idx, _) in enumerate(bm25_results):
             rrf_scores[idx] = rrf_scores.get(idx, 0.0) + 1.0 / (RRF_K + rank + 1)
-
-        # 按 RRF 排序取 top_k
+        for rank, (idx, _) in enumerate(emb_results):
+            rrf_scores[idx] = rrf_scores.get(idx, 0.0) + 1.0 / (RRF_K + rank + 1)
+        sorted_indices = sorted(rrf_scores.items(), key=lambda x: x[1], reverse=True)[:top_k]
+        results = [(idx, score) for idx, score in sorted_indices]
+    else:
+        # 默认双路 hybrid
+        tfidf_results = retrieve_tfidf(data["vectorizer"], data["matrix"], query, top_k * 2)
+        bm25_results = retrieve_bm25(data["bm25"], data["tokenized_corpus"], query, top_k * 2)
+        rrf_scores = {}
+        for rank, (idx, _) in enumerate(tfidf_results):
+            rrf_scores[idx] = rrf_scores.get(idx, 0.0) + 1.0 / (RRF_K + rank + 1)
+        for rank, (idx, _) in enumerate(bm25_results):
+            rrf_scores[idx] = rrf_scores.get(idx, 0.0) + 1.0 / (RRF_K + rank + 1)
         sorted_indices = sorted(rrf_scores.items(), key=lambda x: x[1], reverse=True)[:top_k]
         results = [(idx, score) for idx, score in sorted_indices]
 
@@ -210,8 +244,8 @@ def main():
     parser.add_argument("question", nargs="*", help="你的问题")
     parser.add_argument("--llm", action="store_true", help="使用 LLM 生成回答")
     parser.add_argument("--top-k", type=int, default=TOP_K, help=f"检索结果数 (默认 {TOP_K})")
-    parser.add_argument("--retriever", choices=["tfidf", "bm25", "hybrid"], default="hybrid",
-                        help="检索策略 (默认 hybrid)")
+    parser.add_argument("--retriever", choices=["tfidf", "bm25", "embedding", "hybrid", "hybrid3"], default="hybrid",
+                        help="检索策略: tfidf/bm25/embedding/hybrid(双路)/hybrid3(三路)")
     parser.add_argument("--no-context", action="store_true", help="不显示检索上下文")
     args = parser.parse_args()
 

@@ -122,24 +122,42 @@ def main():
     tokenized_corpus = [tokenize_chinese(c) for c in all_chunks]
     bm25 = BM25Okapi(tokenized_corpus)
 
+    # ── 3. Embedding（语义检索） ──
+    print("  🔧 生成 Embedding…")
+    try:
+        from sentence_transformers import SentenceTransformer
+        model = SentenceTransformer("all-MiniLM-L6-v2")
+        embeddings = model.encode(all_chunks, show_progress_bar=True)
+        has_embedding = True
+        print(f"     维度: {embeddings.shape[1]}")
+    except Exception as e:
+        print(f"  ⚠️  Embedding 生成失败: {e}")
+        print(f"     如果未安装模型，请先运行: python -c \"from sentence_transformers import SentenceTransformer; SentenceTransformer('all-MiniLM-L6-v2')\"")
+        embeddings = None
+        has_embedding = False
+
     # ── 保存（基于脚本所在目录） ──
     base_dir = Path(__file__).parent
     index_dir = base_dir / INDEX_DIR
     index_dir.mkdir(exist_ok=True)
     index_path = index_dir / INDEX_FILE
 
+    data = {
+        "vectorizer": vectorizer,
+        "matrix": tfidf_matrix,
+        "bm25": bm25,
+        "tokenized_corpus": tokenized_corpus,
+        "chunks": all_chunks,
+        "metadatas": all_metas,
+    }
+    if has_embedding:
+        data["embeddings"] = embeddings
+
     with open(index_path, "wb") as f:
-        pickle.dump({
-            "vectorizer": vectorizer,
-            "matrix": tfidf_matrix,
-            "bm25": bm25,
-            "tokenized_corpus": tokenized_corpus,
-            "chunks": all_chunks,
-            "metadatas": all_metas,
-        }, f)
+        pickle.dump(data, f)
 
     print(f"✅ 完成！索引 {len(all_chunks)} 个文本块，保存至 {index_path}")
-    print(f"   TF-IDF 词表: {len(vectorizer.get_feature_names_out())} | BM25 已就绪")
+    print(f"   TF-IDF 词表: {len(vectorizer.get_feature_names_out())} | BM25 已就绪 | Embedding: {'✅' if has_embedding else '❌ 未安装'}")
 
 
 if __name__ == "__main__":

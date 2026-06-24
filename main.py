@@ -105,7 +105,7 @@ class AskRequest(BaseModel):
     question: str
     top_k: int = 5
     llm: Optional[bool] = False
-    retriever: str = "hybrid"  # tfidf / bm25 / hybrid
+    retriever: str = "hybrid"  # tfidf / bm25 / embedding / hybrid / hybrid3
 
 
 class ChatRequest(BaseModel):
