@@ -1,5 +1,7 @@
 # 🏋️ Fitness RAG - 健身知识问答系统
 
+[![CI](https://github.com/jackal-black/fitness-rag/actions/workflows/ci.yml/badge.svg)](https://github.com/jackal-black/fitness-rag/actions/workflows/ci.yml)
+
 基于检索增强生成（RAG）的健身知识问答系统。支持 5 种检索策略、多轮对话、流式输出。
 
 ## 功能
