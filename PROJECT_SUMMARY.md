@@ -1,6 +1,5 @@
 # Fitness RAG — 项目总结文档
 
-> 用途：每次改简历或面试前，把这份文档丢给 LLM，它能基于真实信息给你建议和模拟面试。
 > 最后更新：2025-06-25
 
 ---
@@ -157,92 +156,7 @@ POST /ask
 
 ---
 
-## 七、简历用法
 
-### 7.1 项目描述（详细版）
-
-> **Fitness RAG — 健身知识问答系统**
->
-> 基于检索增强生成（RAG）的健身领域问答系统，支持混合检索、多轮对话和流式输出。
->
-> - 实现 **TF-IDF + BM25 双路检索** + Reciprocal Rank Fusion 融合排序，在 20 道领域测试题上 Hit Rate@1 达 90%，MRR 0.950
-> - 设计 **Session 管理 + 滑动窗口历史**的多轮对话引擎，支持上下文追问
-> - 基于 **SSE 流式输出**实现逐 token 实时显示，内建 **Eval 管线**量化 Hit Rate/MRR/NDCG
-> - 使用 FastAPI 构建 RESTful API + Web UI，Docker 容器化部署，**GitHub Actions CI** 自动运行评估
-> - 技术栈：Python, scikit-learn, FastAPI, DeepSeek/OpenAI API, Docker
-
-### 7.2 精简版（放技能栏）
-
-> 自建 RAG 系统，TF-IDF + BM25 双路检索 + RRF 融合，HR@1 达 90%。支持多轮对话、SSE 流式、Eval 管线。FastAPI + Docker + GitHub Actions。
-
-### 7.3 英文版（投外企）
-
-> **Fitness RAG — Domain-specific Q&A System**
->
-> - Implemented hybrid search (TF-IDF + BM25) with Reciprocal Rank Fusion, achieving **90% Hit Rate@1** and **0.950 MRR** on 20 domain test questions
-> - Designed session-based multi-turn dialogue with sliding window context
-> - Built SSE streaming response and eval pipeline (Hit Rate, MRR, NDCG)
-> - Containerized with Docker, automated CI via GitHub Actions
-> - Stack: Python, scikit-learn, FastAPI, DeepSeek/OpenAI API, Docker
-
----
-
-## 八、面试 QA 库
-
-### Q1：为什么 BM25 比 TF-IDF 好？
-
-> TF-IDF 的评分公式是 TF × IDF，只考虑词频和逆文档频率。BM25 在此基础上加了两个关键改进：
-> 1. **词频饱和**：一个词出现 10 次和 20 次，对相关性的增益不是线性的，BM25 用 k1 参数抑制高频词的过度影响
-> 2. **文档长度归一化**：长文档更容易出现更多关键词，BM25 通过 b 参数对长文档做惩罚
->
-> 在健身问答这种短文本场景下，BM25 的 HR@1 比 TF-IDF 高 5 个百分点（85% → 90%）。
-
-### Q2：RAG 和 Fine-tuning 有什么区别？
-
-> **RAG**：检索外部知识 + 生成回答。适合知识频繁更新、需要引用来源的场景。不需要训练，成本低。
->
-> **Fine-tuning**：让模型学习特定领域的表达方式和知识。适合输出风格固定、不需要外部知识的场景。需要标注数据、训练成本高。
->
-> 健身问答场景适合 RAG，因为：
-> - 知识可以随时新增（新的训练方法、营养指南）
-> - 用户需要看到来源才能信任回答
-> - 不需要模型"记住"特定的输出格式
-
-### Q3：你的 Eval 怎么设计的？
-
-> 我手工标注了 20 道测试题，每道题预设了期望召回的源文件名。评估指标：
-> - **Hit Rate@K**：top-k 结果中是否包含期望文件
-> - **MRR**：第一个相关文档排名的倒数均值
-> - **NDCG**：考虑排序位置的归一化累计增益
->
-> 这样能定量对比不同检索策略（TF-IDF vs BM25 vs Hybrid）的效果差异。
-
-### Q4：为什么不直接用 GPT/DeepSeek 问？
-
-> 通用模型的问题：
-> 1. **时效性**：不知道最新研究成果
-> 2. **权威性**：不知道回答来自哪个来源
-> 3. **一致性**：同一个问题不同时间问，答案可能不同
->
-> RAG 的优势是**可控**——回答基于我选的特定资料，来源可追溯，也方便替换为机构内部知识库。
-
-### Q5：知识库扩大会有什么问题？怎么解决？
-
-> TF-IDF/BM25 超过 50 个文件后效果下降，因为关键词匹配在大量文档中噪声增加。解决方案是升级到 Embedding 语义检索，做三路融合（TF-IDF + BM25 + Embedding），再上层加 Cross-encoder Reranker。
-
-### Q6：哪些代码是你自己写的，哪些是调库？
-
-> 核心逻辑全部自己实现：
-> - TF-IDF 调用 sklearn，但中文分词的 2-gram 策略是自己设计的
-> - BM25 调 rank-bm25 库，但中文分词器是自己写的
-> - RRF 融合算法自己实现
-> - Prompt 模板自己设计
-> - Eval 管线全部自己写
-> - Web UI 纯手写 HTML + JS
->
-> 调库部分：FastAPI（框架）、uvicorn（服务器）、openai（LLM 调用）
-
----
 
 ## 九、后续优化路线图
 
@@ -276,20 +190,5 @@ fitness-rag/
 ├── .gitignore
 ├── .env.example
 └── README.md
-```
 
----
 
-## 十一、对话模板（发简历时用）
-
-### 投递附言
-
-> 您好，附件是我的简历。其中 Fitness RAG 项目是我自建的一个领域问答系统，实现了 TF-IDF + BM25 混合检索、多轮对话、流式输出，并搭建了评估管线量化效果。GitHub 链接：https://github.com/jackal-black/fitness-rag
->
-> 如果对这个项目感兴趣，我可以详细给你讲技术细节。
-
-### 面试开场自我介绍
-
-> 我之前做了一个健身 RAG 问答系统，核心是实现了 TF-IDF 和 BM25 双路检索，用 RRF 融合排序，在 20 道测试题上 Hit Rate@1 达到 90%。支持多轮会话和流式输出，用 FastAPI 搭的接口，Docker 部署，GitHub Actions 自动跑评估。
->
-> 这个项目让我对 RAG 的检索策略、评估方法和工程化有了比较完整的实践。后面如果想用在实际产品中，可以升级 Embedding 检索和对知识库进行更细颗粒度的管理。
